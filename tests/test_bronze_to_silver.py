@@ -4,8 +4,10 @@ import datetime as dt
 import pytest
 from pyspark.sql import functions as F
 
-from migracion.jobs.bronze_to_silver import add_partition, cast_to_schema, deduplicate, upsert
-from migracion.utils.tables import SCHEMAS
+from migracion.jobs.bronze_to_silver import prepare
+from migracion.utils.delta_io import upsert
+from migracion.utils.tables import PRIMARY_KEYS, SCHEMAS
+from migracion.utils.transforms import cast_to_schema, deduplicate
 
 TABLE = "ventas_pos"
 
@@ -24,8 +26,15 @@ def bronze_rows(spark, rows, load_date):
 
 
 def load(spark, rows, load_date, path):
-    source = add_partition(deduplicate(cast_to_schema(bronze_rows(spark, rows, load_date), TABLE), TABLE), TABLE)
-    upsert(spark, source, path, TABLE)
+    upsert(
+        spark,
+        prepare(bronze_rows(spark, rows, load_date), TABLE),
+        target_path=f"{path}/{TABLE}",
+        keys=PRIMARY_KEYS[TABLE],
+        compare_columns=list(SCHEMAS[TABLE]),
+        version_column="fecha_actualizacion",
+        partition_by=["partition_month"],
+    )
 
 
 def snapshot(spark, path):
@@ -38,7 +47,8 @@ def test_dedup_keeps_latest_version(spark):
         {"estado": "ANULADO", "fecha_actualizacion": "2026-09-03 17:00:00"},
         {"estado": "ANULADO", "fecha_actualizacion": "2026-09-03 17:00:00"},  # exact duplicate
     ], "2026-09-15")
-    result = deduplicate(cast_to_schema(df, TABLE), TABLE).collect()
+    typed = cast_to_schema(df, SCHEMAS[TABLE], keep=["_load_date"])
+    result = deduplicate(typed, PRIMARY_KEYS[TABLE], order_by="fecha_actualizacion").collect()
     assert len(result) == 1
     assert result[0]["estado"] == "ANULADO"
 
@@ -87,5 +97,5 @@ def test_unchanged_row_keeps_original_load_date(spark, tmp_path):
 
 def test_invalid_value_fails_cast(spark):
     df = bronze_rows(spark, [{"importe_total": "diez soles"}], "2026-09-01")
-    with pytest.raises(ValueError, match="do not match the DDL types"):
-        cast_to_schema(df, TABLE)
+    with pytest.raises(ValueError, match="do not match the expected types"):
+        cast_to_schema(df, SCHEMAS[TABLE], keep=["_load_date"])
