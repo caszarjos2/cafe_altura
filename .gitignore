@@ -1,0 +1,25 @@
+# Entornos virtuales
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Spark / Delta local
+spark-warehouse/
+metastore_db/
+derby.log
+*.crc
+
+# Data lake local (se genera al correr el pipeline)
+migracion/data/**
+!migracion/data/*/
+!migracion/data/*/.gitkeep
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

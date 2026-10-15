@@ -1,0 +1,8 @@
+# Por defecto, normalizar fin de línea
+* text=auto
+
+# Datos y salidas: se versionan byte a byte (sin conversión CRLF)
+*.csv -text
+
+# Scripts de shell del docker legado: siempre LF
+*.sh text eol=lf
