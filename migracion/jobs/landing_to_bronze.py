@@ -20,7 +20,7 @@ from migracion.utils.tables import TABLES
 
 
 def read_landing(spark: SparkSession, landing_path: str, table: str, load_date: str) -> DataFrame:
-    path = f"{landing_path}/{table}/load_date={load_date}"
+    path = f"{landing_path}/load_date={load_date}/{table}.csv"
     return (
         spark.read.option("header", True)
         .option("encoding", "UTF-8")

@@ -5,7 +5,7 @@
 # e.g.:   upload_landing.sh datos/lote_1 2026-09-01 migracion/data/0_landing
 #         upload_landing.sh datos/lote_2 2026-09-15 s3://cafe-altura-lake/0_landing
 #
-# Result: <landing_path>/<table>/load_date=<date>/<table>.csv
+# Result: <landing_path>/load_date=<date>/<table>.csv
 # Uploading the same date again replaces the files (idempotent).
 set -euo pipefail
 
@@ -33,7 +33,7 @@ for table in "${TABLES[@]}"; do
 done
 
 for table in "${TABLES[@]}"; do
-    target_file="$TARGET/$table/load_date=$LOAD_DATE/$table.csv"
+    target_file="$TARGET/load_date=$LOAD_DATE/$table.csv"
     if [[ "$TARGET" == s3://* ]]; then
         aws s3 cp "$SOURCE_DIR/$table.csv" "$target_file" --only-show-errors
     else
