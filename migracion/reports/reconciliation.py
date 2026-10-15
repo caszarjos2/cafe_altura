@@ -68,35 +68,33 @@ def build_bridge(spark: SparkSession, silver_path: str) -> DataFrame:
         "descontinuado": (None, total("costo", kept & ~has_cost_today)),
         "costo_fecha": (None, F.sum(F.when(kept & has_cost_today, F.col("costo") - F.col("costo_hoy")))),
     }
+    # Every effect is rounded to cents (like Accounting) so the bridge adds up exactly.
     aggregates = [
-        (F.lit(0) if expr is None else F.coalesce(expr, F.lit(0))).cast("decimal(18,4)").alias(f"{kind}_{cause}")
+        (F.lit(0) if expr is None else F.coalesce(expr, F.lit(0))).cast("decimal(14,2)").alias(f"{kind}_{cause}")
         for cause, (venta, costo) in effects.items()
         for kind, expr in (("v", venta), ("c", costo))
     ]
     per_month = lines.groupBy("mes", "canal").agg(
         *aggregates,
-        total("costo_hoy", kept).alias("costo_hoy_lineas"),
-        F.sum("venta_sin_igv").alias("venta_corregida"),
-        F.sum("costo").alias("costo_corregido"),
+        F.sum("venta_sin_igv").cast("decimal(14,2)").alias("venta_corregida"),
+        F.sum("costo").cast("decimal(14,2)").alias("costo_corregido"),
     )
     joined = legacy.join(per_month, ["mes", "canal"])
 
     def row(concept, venta, costo):
         return F.struct(F.lit(concept).alias("concepto"),
-                        venta.cast("decimal(18,4)").alias("venta"), costo.cast("decimal(18,4)").alias("costo"))
+                        venta.cast("decimal(14,2)").alias("venta"), costo.cast("decimal(14,2)").alias("costo"))
 
     rows = [row("reporte_sp", F.col("venta"), F.col("costo"))]
     rows += [row(c, F.col(f"v_{c}"), F.col(f"c_{c}")) for c in effects]
-    # Legacy cost is rounded per report row; line-level cost is not.
-    rows.append(row("redondeo", F.lit(0), F.col("costo_hoy_lineas") - F.col("costo")))
+    # Residual: the legacy report rounds cost per row (mes x tienda x categoria); Accounting rounds per month.
+    explained_cost = F.col("costo")
+    for c in effects:
+        explained_cost = explained_cost + F.col(f"c_{c}")
+    rows.append(row("redondeo", F.lit(0), F.col("costo_corregido") - explained_cost))
     rows.append(row("corregido", F.col("venta_corregida"), F.col("costo_corregido")))
 
-    return (
-        joined.select("mes", "canal", F.explode(F.array(*rows)).alias("r"))
-        .select("mes", "canal", "r.concepto",
-                F.col("r.venta").cast("decimal(14,2)").alias("venta"),
-                F.col("r.costo").cast("decimal(14,4)").alias("costo"))
-    )
+    return joined.select("mes", "canal", F.explode(F.array(*rows)).alias("r")).select("mes", "canal", "r.*")
 
 
 def to_markdown(df: DataFrame, columns: list[str]) -> str:
