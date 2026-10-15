@@ -1,0 +1,26 @@
+# SQL Server 2022 con el proceso actual de Café Altura: el lote 1 cargado en stg,
+# el SP rpt.usp_margen_mensual creado y el reporte ya armado. Es opcional para el reto.
+# Uso: docker compose up -d --wait   (la primera vez tarda unos minutos)
+name: cafe-altura
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: cafe-altura-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "CafeAltura#2026"
+      MSSQL_COLLATION: "Modern_Spanish_CI_AS"
+    ports:
+      - "1433:1433"
+    volumes:
+      - ../../datos:/datos:ro
+      - ..:/legado:ro
+    entrypoint: ["/bin/bash", "/legado/docker/init/entrypoint.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/cafe_altura_lista"]
+      interval: 5s
+      timeout: 3s
+      retries: 180
+      start_period: 10s

@@ -1,0 +1,41 @@
+id_tienda,nombre,ciudad,fecha_apertura
+T001,Café Altura Miraflores,Lima,2020-10-16
+T002,Café Altura San Isidro,Lima,2019-06-06
+T003,Café Altura Barranco,Lima,2019-10-30
+T004,Café Altura Surco,Lima,2019-01-04
+T005,Café Altura La Molina,Lima,2022-03-21
+T006,Café Altura San Borja,Lima,2018-06-28
+T007,Café Altura Jesús María,Lima,2022-07-08
+T008,Café Altura Magdalena,Lima,2018-09-15
+T009,Café Altura Lince,Lima,2019-01-18
+T010,Café Altura Pueblo Libre,Lima,2017-04-16
+T011,Café Altura San Miguel,Lima,2019-11-20
+T012,Café Altura Chorrillos,Lima,2019-03-08
+T013,Café Altura Los Olivos,Lima,2020-06-28
+T014,Café Altura Callao,Lima,2021-09-07
+T015,Café Altura Surquillo,Lima,2021-09-27
+T016,Café Altura Breña,Lima,2022-02-20
+T017,Café Altura Independencia,Lima,2022-02-02
+T018,Café Altura Ate,Lima,2022-09-05
+T019,Café Altura La Victoria,Lima,2021-06-24
+T020,Café Altura Rímac,Lima,2020-11-13
+T021,Café Altura Asia,Lima,2025-06-15
+T022,Café Altura Villa El Salvador,Lima,2025-11-03
+T023,Café Altura Yanahuara,Arequipa,2021-08-21
+T024,Café Altura Cayma,Arequipa,2018-01-23
+T025,Café Altura Cercado,Arequipa,2016-03-19
+T026,Café Altura Umacollo,Arequipa,2023-11-23
+T027,Café Altura Sachaca,Arequipa,2020-09-23
+T028,Café Altura Centro,Trujillo,2023-05-22
+T029,Café Altura Víctor Larco,Trujillo,2020-05-11
+T030,Café Altura California,Trujillo,2017-08-25
+T031,Café Altura Huanchaco,Trujillo,2020-11-14
+T032,Café Altura Plaza de Armas,Cusco,2021-10-05
+T033,Café Altura San Blas,Cusco,2022-04-17
+T034,Café Altura Wanchaq,Cusco,2017-03-12
+T035,Café Altura Centro,Piura,2017-08-13
+T036,Café Altura Castilla,Piura,2017-08-06
+T037,Café Altura El Chipe,Piura,2022-11-02
+T038,Café Altura Centro,Chiclayo,2019-12-18
+T039,Café Altura La Victoria,Chiclayo,2017-12-08
+T040,Café Altura Santa Victoria,Chiclayo,2016-01-19

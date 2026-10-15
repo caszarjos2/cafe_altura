@@ -1,0 +1,63 @@
+sku_erp,nombre,categoria
+ERP-PT-0001,Café en grano Chanchamayo 250 g,cafe_grano
+ERP-PT-0002,Café en grano Chanchamayo 500 g,cafe_grano
+ERP-PT-0003,Café en grano Villa Rica 250 g,cafe_grano
+ERP-PT-0004,Café en grano Villa Rica 500 g,cafe_grano
+ERP-PT-0005,Café en grano Quillabamba 250 g,cafe_grano
+ERP-PT-0006,Café en grano Sandia 250 g,cafe_grano
+ERP-PT-0007,Café en grano Jaén 250 g,cafe_grano
+ERP-PT-0008,Café en grano Rodríguez de Mendoza 250 g,cafe_grano
+ERP-PT-0009,Blend Altura en grano 1 kg,cafe_grano
+ERP-PT-0010,Espresso Altura en grano 1 kg,cafe_grano
+ERP-PT-0011,Café molido Chanchamayo 250 g,cafe_molido
+ERP-PT-0012,Café molido Chanchamayo 500 g,cafe_molido
+ERP-PT-0013,Café molido Villa Rica 250 g,cafe_molido
+ERP-PT-0014,Café molido Villa Rica 500 g,cafe_molido
+ERP-PT-0015,Café molido Quillabamba 250 g,cafe_molido
+ERP-PT-0016,Café molido Jaén 250 g,cafe_molido
+ERP-PT-0017,Café molido descafeinado 250 g,cafe_molido
+ERP-PT-0018,Café molido Tradicional 250 g,cafe_molido
+ERP-PT-0019,Espresso,bebidas
+ERP-PT-0020,Americano,bebidas
+ERP-PT-0021,Café pasado,bebidas
+ERP-PT-0022,Capuchino,bebidas
+ERP-PT-0023,Latte,bebidas
+ERP-PT-0024,Latte grande,bebidas
+ERP-PT-0025,Flat white,bebidas
+ERP-PT-0026,Mocaccino,bebidas
+ERP-PT-0027,Chocolate caliente,bebidas
+ERP-PT-0028,Chai latte,bebidas
+ERP-PT-0029,Frappé de café,bebidas
+ERP-PT-0030,Cold brew,bebidas
+ERP-PT-0031,Café helado,bebidas
+ERP-PT-0032,Té de hierbas,bebidas
+ERP-PT-0033,Jugo de naranja,bebidas
+ERP-PT-0034,Limonada,bebidas
+ERP-PT-0035,Croissant de mantequilla,panaderia
+ERP-PT-0036,Pan de chocolate,panaderia
+ERP-PT-0037,Empanada de carne,panaderia
+ERP-PT-0038,Empanada de pollo,panaderia
+ERP-PT-0039,Alfajor,panaderia
+ERP-PT-0040,Pie de manzana,panaderia
+ERP-PT-0041,Muffin de arándanos,panaderia
+ERP-PT-0042,Pan del día anterior,panaderia
+ERP-PT-0043,Cachito,panaderia
+ERP-PT-0044,Sándwich de pollo,panaderia
+ERP-PT-0045,Triple,panaderia
+ERP-PT-0046,Cheesecake de maracuyá,postres
+ERP-PT-0047,Torta de chocolate,postres
+ERP-PT-0048,Suspiro a la limeña,postres
+ERP-PT-0049,Tres leches,postres
+ERP-PT-0050,Brownie,postres
+ERP-PT-0051,Tartaleta de fresa,postres
+ERP-PT-0052,Picarones,postres
+ERP-PT-0053,Mazamorra morada,postres
+ERP-PT-0054,Taza Altura,merchandising
+ERP-PT-0055,Termo Altura,merchandising
+ERP-PT-0056,Prensa francesa,merchandising
+ERP-PT-0057,Molinillo manual,merchandising
+ERP-PT-0058,Filtros de papel x100,merchandising
+ERP-PT-0059,Chemex,merchandising
+ERP-PT-0060,Bolsa de tela Altura,merchandising
+ERP-PT-0061,Gorra Altura,merchandising
+ERP-PT-0062,Delivery,servicio
