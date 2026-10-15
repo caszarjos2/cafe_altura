@@ -46,11 +46,24 @@
 ### 4.3 Bronze sobre-diseñado
 - Ver 3.3: el `replaceWhere` por lote era innecesario dado que landing conserva el histórico.
 
+### 4.4 Puente de conciliación incompleto: faltaba una causa
+- **Qué pasó:** la primera versión del puente SP → Contabilidad cuadraba en venta, pero en costo de tiendas le faltaban ~S/ 68 mil para llegar al total corregido.
+- **Cómo lo detecté:** sumando a mano las filas del puente: reporte SP + causas ≠ corregido. El test de cuadre (corregido vs contable) pasaba, así que el error estaba en la explicación, no en el reporte.
+- **Causa y corrección:** la IA calculaba el efecto "costo de hoy vs costo a la fecha" como `costo - costo_hoy`, y para dos productos `costo_hoy` era NULL, así que esas líneas se perdían de la suma. Al investigarlo apareció **una causa real nueva**: Chemex y Tartaleta de fresa están descontinuadas (su costo se cerró en 2026) y el SP les pone costo cero en todos los meses. Se agregó como causa propia (S/ 85 mil) y el puente quedó cuadrando al céntimo.
+- **Lección:** que el resultado final cuadre no basta; el puente también tiene que sumar.
+
+### 4.5 Detalles menores corregidos en la revisión
+- La nota para la jefa decía "cinco productos sin mapeo": son 7 distintos (4 en POS y 5 en web, con 2 repetidos). Lo detecté al revisar la lista de SKU.
+- Primera versión del test del corregido: importaba un módulo de test desde otro y creaba una expresión de Spark al importar, sin sesión activa. Se movieron los helpers a `tests/helpers.py`.
+
 ## 5. Hallazgos validados (no asumidos)
 
 - **Collation de SQL Server** (`Modern_Spanish_CI_AS`): compara sin distinguir mayúsculas e ignora espacios finales. Las tiendas de Cusco envían SKU como `'ca-00024 '` y la categoría delivery es `'servicio'` en minúsculas; SQL Server los trata igual que `'CA-00024'` y `'SERVICIO'`. Spark no, así que la réplica debe normalizar. Se detectó porque la réplica no emparejaba filas con la salida real del SP.
 - **Lote 2 trae llaves duplicadas** dentro del archivo: 240 en POS y 49 en web. Unas son cambios de estado (gana la `fecha_actualizacion` más reciente) y otras son duplicados exactos (se verificó que todas las columnas son idénticas). Hay que deduplicar antes del MERGE.
 - **No hay llaves subrogadas:** todas las PK son naturales, según el DDL, y no tienen NULL.
+- **Mapeo por nombre con evidencia, no por patrón:** la IA propuso primero deducir `ERP-PT-00NN` desde `CA-000NN`. Antes de implementarlo se verificó que la `descripcion` de la boleta es idéntica al nombre del producto en el 100% de las líneas mapeadas, y se usó eso. Es una regla respaldada por los datos, no una suposición sobre el formato del código.
+- **Paridad byte a byte:** el reporte de Spark se compara con `legado/salida` con `filecmp`, no "a ojo" ni con tolerancia.
+- **Cuadre con Contabilidad:** 40 de 40 meses × canal al céntimo, en venta y costo, a nivel de línea. En el reporte por fila queda solo un redondeo de S/ 0.09 en total, explicado.
 
 ## 6. Autocrítica
 
