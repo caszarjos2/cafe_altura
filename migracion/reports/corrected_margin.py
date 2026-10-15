@@ -26,7 +26,8 @@ WITH productos_slug AS (
 -- CORRECCION 4: tipo de cambio de cada dia = ultimo publicado (fines de semana y feriados no se publican).
 tc_diario AS (
     SELECT d.fecha,
-           last_value(tc.tc, true) OVER (ORDER BY d.fecha ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS tc
+           last_value(tc.tc, true) OVER (ORDER BY d.fecha ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS tc,
+           tc.tc IS NOT NULL AS publicado
     FROM (
         SELECT explode(sequence(
                    (SELECT min(fecha) FROM tipo_cambio),
@@ -46,7 +47,12 @@ lineas AS (
              THEN concat(v.tipo_comprobante, '-', v.serie, '-', CAST(v.numero AS STRING)) END AS ticket,
         CASE WHEN v.tipo_comprobante = '07' THEN -v.cantidad ELSE v.cantidad END AS unidades,
         CAST(CASE WHEN v.tipo_comprobante = '07' THEN -v.importe_total ELSE v.importe_total END
-             / 1.18 AS DECIMAL(12,2)) AS venta_sin_igv
+             / 1.18 AS DECIMAL(12,2)) AS venta_sin_igv,
+        -- Trazabilidad para la conciliacion (no afecta el reporte).
+        v.estado,
+        m.sku_erp IS NOT NULL AS mapeado,
+        'PEN' AS moneda,
+        true AS tc_publicado
     FROM ventas_pos v
     LEFT JOIN mapeo_sku m ON upper(rtrim(m.sku_pos)) = upper(rtrim(v.sku))
     -- CORRECCION 1: si el SKU no esta en mapeo_sku, se ubica el producto por su nombre.
@@ -70,7 +76,11 @@ lineas AS (
         w.id_pedido,
         w.cantidad,
         CAST(CASE WHEN w.moneda = 'USD' THEN w.importe * tc.tc ELSE w.importe END
-             / 1.18 AS DECIMAL(12,2))
+             / 1.18 AS DECIMAL(12,2)),
+        w.estado,
+        m.sku_erp IS NOT NULL,
+        w.moneda,
+        tc.publicado
     FROM pedidos_web w
     LEFT JOIN mapeo_sku m ON upper(rtrim(m.sku_web)) = upper(rtrim(w.sku_web))
     -- CORRECCION 1: si el sku_web no esta en mapeo_sku, se ubica el producto por su nombre.
