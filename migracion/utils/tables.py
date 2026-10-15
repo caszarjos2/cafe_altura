@@ -1,6 +1,6 @@
-"""Tablas del origen (stg de SQL Server) y sus llaves primarias, según legado/ddl.sql."""
+"""Source tables (SQL Server stg schema) and their primary keys, as defined in legado/ddl.sql."""
 
-PKS = {
+PRIMARY_KEYS = {
     "ventas_pos": ["tipo_comprobante", "serie", "numero", "item"],
     "pedidos_web": ["id_pedido", "linea"],
     "mapeo_sku": ["sku_pos"],
@@ -10,4 +10,4 @@ PKS = {
     "tiendas": ["id_tienda"],
 }
 
-TABLAS = list(PKS)
+TABLES = list(PRIMARY_KEYS)

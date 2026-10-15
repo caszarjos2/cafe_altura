@@ -1,10 +1,9 @@
-"""SparkSession con Delta y lectura de argumentos, igual en local que en AWS Glue.
+"""SparkSession with Delta and argument parsing that work the same locally and on AWS Glue.
 
-- En Glue (5.1) el job se crea con `--datalake-formats delta`, que agrega los jars de Delta;
-  aquí solo se configuran las extensiones.
-- En local se usa `configure_spark_with_delta_pip` (pyspark==3.5.6, delta-spark==3.3.2).
-- Los argumentos llegan como `--nombre valor` en ambos casos, así que las rutas pueden ser
-  locales o `s3://`.
+- On Glue (5.1) the job is created with `--datalake-formats delta`, which provides the Delta
+  jars; here we only set the extensions.
+- Locally we use `configure_spark_with_delta_pip` (pyspark==3.5.6, delta-spark==3.3.2).
+- Arguments arrive as `--name value` in both cases, so paths can be local or `s3://`.
 """
 import argparse
 import os
@@ -15,12 +14,12 @@ from pyspark.sql import SparkSession
 DELTA_CONF = {
     "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
     "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-    # Las fechas del origen no traen zona horaria: se interpretan tal cual, sin desplazamientos.
+    # Source timestamps carry no time zone: read them as-is, without shifting.
     "spark.sql.session.timeZone": "UTC",
 }
 
 
-def en_glue() -> bool:
+def is_glue() -> bool:
     try:
         import awsglue  # noqa: F401
         return True
@@ -28,38 +27,38 @@ def en_glue() -> bool:
         return False
 
 
-def obtener_spark(app: str = "cafe-altura") -> SparkSession:
-    builder = SparkSession.builder.appName(app)
-    for clave, valor in DELTA_CONF.items():
-        builder = builder.config(clave, valor)
+def get_spark(app_name: str = "cafe-altura") -> SparkSession:
+    builder = SparkSession.builder.appName(app_name)
+    for key, value in DELTA_CONF.items():
+        builder = builder.config(key, value)
 
-    if en_glue():
+    if is_glue():
         return builder.getOrCreate()
 
     from delta import configure_spark_with_delta_pip
 
-    os.environ.setdefault("PYSPARK_PYTHON", sys.executable)  # los workers usan este mismo Python
+    os.environ.setdefault("PYSPARK_PYTHON", sys.executable)  # workers use this same Python
     builder = (
         builder.master("local[*]")
-        .config("spark.sql.shuffle.partitions", "8")  # datos chicos: evita 200 tareas vacías
+        .config("spark.sql.shuffle.partitions", "8")  # small data: avoid 200 empty tasks
         .config("spark.ui.showConsoleProgress", "false")
     )
     return configure_spark_with_delta_pip(builder).getOrCreate()
 
 
-def leer_argumentos(obligatorios: list[str], opcionales: dict[str, str] | None = None) -> dict[str, str]:
-    """Lee `--nombre valor`. En Glue usa getResolvedOptions; en local, argparse."""
-    opcionales = opcionales or {}
-    if en_glue():
+def read_args(required: list[str], optional: dict[str, str] | None = None) -> dict[str, str]:
+    """Parse `--name value` args. Uses getResolvedOptions on Glue, argparse locally."""
+    optional = optional or {}
+    if is_glue():
         from awsglue.utils import getResolvedOptions
 
-        presentes = [o for o in opcionales if f"--{o}" in sys.argv]
-        args = getResolvedOptions(sys.argv, obligatorios + presentes)
-        return {**opcionales, **args}
+        present = [name for name in optional if f"--{name}" in sys.argv]
+        args = getResolvedOptions(sys.argv, required + present)
+        return {**optional, **args}
 
     parser = argparse.ArgumentParser()
-    for nombre in obligatorios:
-        parser.add_argument(f"--{nombre}", required=True)
-    for nombre, defecto in opcionales.items():
-        parser.add_argument(f"--{nombre}", default=defecto)
+    for name in required:
+        parser.add_argument(f"--{name}", required=True)
+    for name, default in optional.items():
+        parser.add_argument(f"--{name}", default=default)
     return vars(parser.parse_known_args()[0])
