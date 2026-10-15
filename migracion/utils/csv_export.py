@@ -29,3 +29,5 @@ def write_single_csv(spark: SparkSession, df: DataFrame, path: str) -> None:
     if not fs.rename(part, target):
         raise IOError(f"Could not move {part} to {path}")
     fs.delete(tmp, True)
+    # The local filesystem leaves a hidden .crc checksum next to the file: not part of the output.
+    fs.delete(jvm.org.apache.hadoop.fs.Path(target.getParent(), f".{target.getName()}.crc"), False)
