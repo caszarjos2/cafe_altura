@@ -2,7 +2,7 @@
 
 **Versión y tipo de job.** Glue 5.1 (Spark 3.5.6, Python 3.11, Delta 3.3.2, Java 17), con la misma versión con la que se desarrolló y probó en local. Tres jobs **Spark ETL** (`glueetl`), uno por capa: `landing_to_bronze`, `bronze_to_silver` y `silver_to_gold`. Los scripts son `migracion/jobs/*.py`; el paquete `migracion/` se sube como zip con `--extra-py-files`. Las rutas llegan por parámetro (`--landing_path`, `--load_date`, etc.) y `utils/spark.py` usa `getResolvedOptions` en Glue y `argparse` en local, así que el código es el mismo en los dos entornos. Cada job tiene `max concurrent runs = 1`, para que no corran dos MERGE a la vez.
 
-**Workers.** 2 × G.1X (4 vCPU, 16 GB): el volumen es chico (~260 mil líneas POS en 20 meses, ~7 mil nuevas cada 2 semanas). En local, la suite de tests procesa los dos lotes completos tres veces en menos de 3 minutos. Auto Scaling activado con un máximo de 4 workers, para absorber un backfill. Timeout de 30 minutos por job.
+**Workers.** 2 × G.1X (4 vCPU, 16 GB): el volumen es chico (~260 mil líneas POS en 20 meses, ~7 mil nuevas cada 2 semanas). En local (WSL), un lote completo, con los tres jobs y el arranque de Spark, tarda unos 3 minutos. Auto Scaling activado con un máximo de 4 workers, para absorber un backfill. Timeout de 30 minutos por job.
 
 **Delta.** `--datalake-formats delta` más `--conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog`. Mantenimiento semanal: `OPTIMIZE` en silver (`ventas_pos` y `pedidos_web`) y `VACUUM` con retención de 7 días. El historial de Delta permite auditar y volver atrás (*time travel*) cualquier carga.
 
